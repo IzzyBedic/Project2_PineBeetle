@@ -1,0 +1,50 @@
+---
+title: "Predicting the Minimum Linear Distance from a Given Pine Tree to the Nearest Tree that is Infected by Pine Beetles"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(readxl)
+library(GGally) # ggpairs
+library(vip)
+library(tidymodels)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Data Showcase
+
+```{r readindata}
+pine_tbl <- read_excel("../../hgen-612_temp/p1/data/Data_1993.xlsx", sheet = 1)
+```
+
+```{r makeshowcasebones}
+glimpse(pine_tbl) # correlation matrix or ggpairs, make a table
+```
+
+```{r ggpairs}
+# correlation matrix or ggpairs, make a table
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Predictors
+
+```{r}
+
+```
+
+### Model Results
+
+```{r}
+
+```
+
