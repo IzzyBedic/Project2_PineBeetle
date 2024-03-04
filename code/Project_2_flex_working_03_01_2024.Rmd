@@ -16,6 +16,37 @@ library(vip)
 library(tidymodels)
 ```
 
+Read Me
+==============================================================================
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### What are Pine Beetles?
+
+Read me before proceeding to the analysis!
+
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Picture of variables
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Relevant habits that might be relevant to our analysis
+
+1. There are multiple organisms that may cause tree death around pine beetles
+2. Female Pine Beetles use pheromones to attract other Pine Beetles nearby when they are ready to lay eggs
+3. Pine Beetles infestations in forests are usually directional
+
+[Pine Beetle Source](https://www.treefarmsystem.org/SPBwhenbeetlesattack)
+
+Data Exploration
+==============================================================================
+
 Column {data-width=650}
 -----------------------------------------------------------------------
 
@@ -33,6 +64,9 @@ glimpse(pine_tbl) # correlation matrix or ggpairs, make a table
 # correlation matrix or ggpairs, make a table
 ```
 
+Analysis
+==============================================================================
+
 Column {data-width=350}
 -----------------------------------------------------------------------
 
@@ -42,9 +76,23 @@ Column {data-width=350}
 
 ```
 
+### Explanation of code
+
+```{r}
+
+```
+
+Conclusion
+==============================================================================
+
 ### Model Results
 
 ```{r}
 
 ```
 
+### ROC AUC
+
+```{r}
+
+```
