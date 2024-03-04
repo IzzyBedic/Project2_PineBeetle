@@ -5,6 +5,7 @@ output:
     orientation: columns
     vertical_layout: fill
     source_code: embed
+    theme: yeti
 ---
 
 ```{r setup, include=FALSE}
@@ -27,15 +28,6 @@ Column {data-width=350}
 Read me before proceeding to the analysis!
 
 
-Column {data-width=350}
------------------------------------------------------------------------
-
-### Picture of variables
-
-
-Column {data-width=650}
------------------------------------------------------------------------
-
 ### Relevant habits that might be relevant to our analysis
 
 1. There are multiple organisms that may cause tree death around pine beetles
@@ -43,6 +35,13 @@ Column {data-width=650}
 3. Pine Beetles infestations in forests are usually directional
 
 [Pine Beetle Source](https://www.treefarmsystem.org/SPBwhenbeetlesattack)
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Picture of variables
+
 
 Data Exploration
 ==============================================================================
