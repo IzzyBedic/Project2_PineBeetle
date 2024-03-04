@@ -14,6 +14,7 @@
 library(flexdashboard)
 library(tidyverse)
 library(readxl)
+library(GGally)
 library(vip)
 library(tidymodels)
 
@@ -54,4 +55,5 @@ ggpairs(pine_tbl, columns = c("IND_BA_Infest_20th",
                               "IND_BA_Infest_1",
                               "IND_BA_Infest_1.5")) # multicollinearity, only need one
 
+# 
 
