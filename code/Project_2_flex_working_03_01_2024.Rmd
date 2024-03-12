@@ -23,9 +23,10 @@ Read Me
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### What are Pine Beetles?
+### What are Pine Beetles? And Why Are You Reading This?
 
 Read me before proceeding to the analysis!
+(Here goes the objectives for the analysis and a brief description of the problem Pine Beetles pose as well as what they are)
 
 
 ### Relevant habits that might be relevant to our analysis
@@ -46,10 +47,10 @@ Column {data-width=650}
 Data Exploration
 ==============================================================================
 
-Column {data-width=650}
+Column {data-width=300}
 -----------------------------------------------------------------------
 
-### Data Showcase
+### Data Table
 
 ```{r readindata}
 pine_tbl <- read_excel("../../hgen-612_temp/p1/data/Data_1993.xlsx", sheet = 1)
@@ -63,7 +64,20 @@ glimpse(pine_tbl) # correlation matrix or ggpairs, make a table
 # correlation matrix or ggpairs, make a table
 ```
 
-Analysis
+Column {data-width=450}
+-----------------------------------------------------------------------
+
+### GGPairs
+
+```{r ggpairs}
+```
+
+### Things to Note
+
+Look at patterns, outliers, anything surprising, reasons for choosing certain 
+variables in the recipe, things that are not normally distributed, etc. 
+
+Modelling Strategy
 ==============================================================================
 
 Column {data-width=350}
