@@ -57,7 +57,7 @@ ggpairs(pine_tbl, columns = c("IND_BA_Infest_20th",
 
 # Haven't decided which variables to use, but here is the code that will be used
 
-pine_rec <- pine_tbl %>% 
+pine_recipe <- pine_tbl %>% 
   recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + BA_20th) %>% 
   step_sqrt(all_outcomes()) %>% # transforms to make normal
   step_corr(all_predictors()) # gets rid of variables to get rid of multicolinearity
