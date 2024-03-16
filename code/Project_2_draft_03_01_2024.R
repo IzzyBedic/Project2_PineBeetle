@@ -11,6 +11,7 @@
 
 # Loading Libraries
 
+library(reprex)
 library(flexdashboard)
 library(tidyverse)
 library(readxl)
@@ -57,10 +58,11 @@ ggpairs(pine_tbl, columns = c("IND_BA_Infest_20th",
 
 # Haven't decided which variables to use, but here is the code that will be used
 
+# Create recipe
 pine_recipe <- pine_tbl %>% 
   recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + BA_20th) %>% 
-  step_sqrt(all_outcomes()) %>% # transforms to make normal
-  step_corr(all_predictors()) # gets rid of variables to get rid of multicolinearity
+  step_sqrt(all_outcomes()) %>% # transforms to make normal --- MAKE SURE STILL SHOULD BE SQRT IF NEW VARIABLES
+  step_corr(all_predictors()) # gets rid of variables to get rid of multicollinearity 
 
 
 
