@@ -35,7 +35,9 @@ Read me before proceeding to the analysis!
 2. Female Pine Beetles use pheromones to attract other Pine Beetles nearby when they are ready to lay eggs<sup>1</sup>
 3. Pine Beetles infestations in forests are usually directional<sup>1</sup>
 4. Most Pine Beetles like attacking bigger trees (>10in), but when there is a lot of competition for trees, they will attack smaller trees<sup>2</sup>
-5. 
+
+5. Pine Beetles usually fly 300 feet or less at a time
+- 300 feet = ~.007 acres, which means that we will probably not want to use any of the beetle population pressure measures of over the smallest variable measure (1/20 acres = .05 acres)<sup>2</sup>
 
 [1](https://www.treefarmsystem.org/SPBwhenbeetlesattack)
 [2](https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb5304956.pdf)
