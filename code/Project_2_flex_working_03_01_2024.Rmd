@@ -31,12 +31,15 @@ Read me before proceeding to the analysis!
 
 ### Relevant habits that might be relevant to our analysis
 
-1. There are multiple organisms that may cause tree death around pine beetles
-2. Female Pine Beetles use pheromones to attract other Pine Beetles nearby when they are ready to lay eggs
-3. Pine Beetles infestations in forests are usually directional
+1. There are multiple organisms that may cause tree death around pine beetles<sup>1</sup>
+2. Female Pine Beetles use pheromones to attract other Pine Beetles nearby when they are ready to lay eggs<sup>1</sup>
+3. Pine Beetles infestations in forests are usually directional<sup>1</sup>
+4. Most Pine Beetles like attacking bigger trees (>10in), but when there is a lot of competition for trees, they will attack smaller trees<sup>2</sup>
+5. 
 
-[Pine Beetle Source](https://www.treefarmsystem.org/SPBwhenbeetlesattack)
-
+[1](https://www.treefarmsystem.org/SPBwhenbeetlesattack)
+[2](https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb5304956.pdf)
+[3](https://fennerschool-associated.anu.edu.au/mensuration/density.html)
 
 Column {data-width=650}
 -----------------------------------------------------------------------
@@ -73,6 +76,7 @@ Column {data-width=450}
 ```
 
 ### Things to Note
+
 
 Look at patterns, outliers, anything surprising, reasons for choosing certain 
 variables in the recipe, things that are not normally distributed, etc. 
