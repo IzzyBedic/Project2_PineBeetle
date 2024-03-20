@@ -2,7 +2,7 @@
 title: "Predicting the Minimum Linear Distance from a Given Pine Tree to the Nearest Tree that is Infected by Pine Beetles"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
+    orientation: rows
     vertical_layout: fill
     source_code: embed
     theme: yeti
@@ -20,14 +20,15 @@ library(tidymodels)
 Read Me
 ==============================================================================
 
-Column {data-width=350}
+Row {data-height=400}
 -----------------------------------------------------------------------
 
 ### What are Pine Beetles? And Why Are You Reading This?
 
-Read me before proceeding to the analysis!
-(Here goes the objectives for the analysis and a brief description of the problem Pine Beetles pose as well as what they are)
+*Read me before proceeding to the analysis!*
 
+Pine Beetles are insects that can cause devastation to forests. They cause economic and ecological harm, so it's important to figure out how to
+(Here goes the objectives for the analysis and a brief description of the problem Pine Beetles pose as well as what they are)
 
 ### Relevant habits that might be relevant to our analysis
 
@@ -39,20 +40,22 @@ Read me before proceeding to the analysis!
 5. Pine Beetles usually fly 300 feet or less at a time
 - 300 feet = ~.007 acres, which means that we will probably not want to use any of the beetle population pressure measures of over the smallest variable measure (1/20 acres = .05 acres)<sup>2</sup>
 
-[1](https://www.treefarmsystem.org/SPBwhenbeetlesattack)
-[2](https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb5304956.pdf)
-[3](https://fennerschool-associated.anu.edu.au/mensuration/density.html)
+1. [1](https://www.treefarmsystem.org/SPBwhenbeetlesattack)
+2. [2](https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb5304956.pdf)
+3. [3](https://fennerschool-associated.anu.edu.au/mensuration/density.html)
 
-Column {data-width=650}
+Row {data-height=500}
 -----------------------------------------------------------------------
 
 ### Picture of variables
+
+<img src="../img/variables.png" width="200" height="100">
 
 
 Data Exploration
 ==============================================================================
 
-Column {data-width=300}
+Row {data-height=300}
 -----------------------------------------------------------------------
 
 ### Data Table
@@ -69,7 +72,7 @@ glimpse(pine_tbl) # correlation matrix or ggpairs, make a table
 # correlation matrix or ggpairs, make a table
 ```
 
-Column {data-width=450}
+Row {data-height=450}
 -----------------------------------------------------------------------
 
 ### GGPairs
@@ -86,7 +89,7 @@ variables in the recipe, things that are not normally distributed, etc.
 Modelling Strategy
 ==============================================================================
 
-Column {data-width=350}
+Row {data-height=350}
 -----------------------------------------------------------------------
 
 ### Predictors
