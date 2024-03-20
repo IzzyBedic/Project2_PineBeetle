@@ -33,7 +33,7 @@ Pine Beetles are insects that can cause devastation to forests by eating into tr
 There are five categories of variables shown on the Variable Chart page, which is accessed through the tabs at the top of this page: Tree diameter, infestation severity, nearest brood tree, forest density, and beetle population pressure.
 <br>
 </br>
-Knowing how these variables relate to each other can help foresters figure out how to protect forests. In this analysis, I will make two models for predicting the minimum linear distance to the nearest brood tree, or DeadDist. In other words, how far away from an infected tree can a given healthy tree be to be considered "safe"? This is important for foresters so that they don't clear trees unnecessarily.
+Knowing how these variables relate to each other can help foresters figure out how to protect forests. For example, in this analysis, I will make two models for predicting the minimum linear distance to the nearest brood tree, or DeadDist. In other words, how far away from an infected tree can a given healthy tree be to be considered "safe"? This is important for foresters so that they don't clear trees unnecessarily and know when to expect tree death.
 
 ### Relevant habits that might be relevant to our analysis
 
