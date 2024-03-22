@@ -15,6 +15,7 @@ library(readxl)
 library(GGally) # ggpairs
 library(vip)
 library(tidymodels)
+library(DT) # datatable
 ```
 
 Read Me
@@ -35,10 +36,10 @@ There are five categories of variables shown on the Variable Chart page, which i
 </br>
 Knowing how these variables relate to each other can help foresters figure out how to protect forests. For example, in this analysis, I will make two models for predicting the minimum linear distance to the nearest brood tree, or DeadDist. In other words, how far away from an infected tree can a given healthy tree be to be considered "safe"? This is important for foresters so that they don't clear trees unnecessarily and know when to expect tree death.
 
-### Relevant habits that might be relevant to our analysis
+### Pine Beetle characteristics that might be relevant to our analysis
 
 * Female Pine Beetles use pheromones to attract other Pine Beetles nearby when they are ready to lay eggs<sup>1</sup>
-  + Pine Beetles will tend to attack as a group and infected trees will cause more infection around them
+  + Pine Beetles will tend to attack as a group and infected trees will cause more infection around them (a reason to include infestation severity and nearest brood tree variables)
 <br>
 </br>
 * Pine Beetles infestations in forests are usually directional<sup>1</sup>
@@ -77,7 +78,11 @@ glimpse(pine_tbl) # correlation matrix or ggpairs, make a table
 ```
 
 ```{r ggpairs}
-# correlation matrix or ggpairs, make a table
+ggpairs(pine_tbl, columns = c("DeadDist", 
+                              "TreeDiam", 
+                              "Infest_Serv1", 
+                              "SDI_20th",
+                              "BA_Inf_20th")) 
 ```
 
 Row {data-height=450}
