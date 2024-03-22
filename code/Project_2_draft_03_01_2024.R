@@ -33,6 +33,18 @@ ggpairs(pine_tbl, columns = c("DeadDist",
                               "SDI_20th",
                               "BA_Inf_20th")) 
 
+pine_fact_tbl <- pine_tbl %>% 
+  mutate(IND_BA_Infest_20th_fac = factor(IND_BA_Infest_20th,
+                              levels = 0:1,
+                              labels = c("No infested trees within 1/20th acre", "Infested trees within 1/20th acre")))
+
+ggpairs(pine_fact_tbl, columns = c("DeadDist", 
+                                   "TreeDiam", 
+                                   "Infest_Serv1", 
+                                   "SDI_20th"), ggplot2::aes(color = IND_BA_Infest_20th_fac))
+
+
+
 
 # ggpairs(pine_tbl, columns = c("DeadDist", 
 #                               "Ind_DeadDist")) # DeadDist is given in homework desc
