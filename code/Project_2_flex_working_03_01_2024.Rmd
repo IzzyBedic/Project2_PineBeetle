@@ -63,6 +63,10 @@ Row {data-height=200}
 2. [Pine Beetle FAQ USDA](https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb5304956.pdf)
 3. [Stand Density Index info](https://fennerschool-associated.anu.edu.au/mensuration/density.html)
 
+
+
+
+
 Data Exploration
 ==============================================================================
 
@@ -122,9 +126,35 @@ Row {data-height=350}
 
 ### Predictors
 
-```{r histograms}
+```{r ridgesplit}
+# Create training/testing data
+pine_split <- initial_split(pine_tbl)
+pine_train <- training(pine_split)
+pine_test <- testing(pine_split)
 
 ```
+
+```{r ridgerecipe}
+# Creating Recipe
+pine_recipe <- pine_tbl %>% 
+  recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
+  step_sqrt(all_outcomes()) %>% # transforms to make normal
+  step_corr(all_predictors()) # gets rid of variables to get rid of multicollinearity 
+```
+
+```{r ridgeengine}
+ridge_model <- linear_reg(mixture = 0, penalty = 0.1629751) %>%  # mixture = 0 means ridge
+  set_engine("glmnet")
+```
+
+```{r ridgeworkflow}
+# create workflow
+pine_ridge_wflow <- 
+  workflow() %>% 
+  add_model(ridge_model) %>% 
+  add_recipe(pine_recipe)
+```
+
 
 ### Explanation of code
 
@@ -159,19 +189,7 @@ Conclusion
 ### Model Results
 
 ```{r}
-# Create training/testing data
-pine_split <- initial_split(pine_tbl)
-pine_train <- training(pine_split)
-pine_test <- testing(pine_split)
 
-# Creating Recipe
-pine_recipe <- pine_tbl %>% 
-  recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
-  step_sqrt(all_outcomes()) %>% # transforms to make normal
-  step_corr(all_predictors()) # gets rid of variables to get rid of multicollinearity 
-
-ridge_mod <- linear_reg(mixture = 0, penalty = 0.1629751) %>%  # validation sample or re-sampling can estimate this
-  set_engine("glmnet")
 ```
 
 ### ROC AUC
