@@ -83,7 +83,7 @@ pine_tbl %>%
 Row {data-height=450}
 -----------------------------------------------------------------------
 
-### Scatterplot matrix: Let's see if there's any multicollinearity. Observe how all the variables look graphed with each other!
+### Factors related to Pine Beetle infestation in forests as they relate to each other when a tree within 1/20th acres is infested vs not
 
 ```{r ggpairs}
 pine_fact_tbl <- pine_tbl %>% 
@@ -94,11 +94,19 @@ pine_fact_tbl <- pine_tbl %>%
 ggpairs(pine_fact_tbl, columns = c("DeadDist", 
                                    "TreeDiam", 
                                    "Infest_Serv1", 
-                                   "SDI_20th"), ggplot2::aes(color = IND_BA_Infest_20th_fac), 
-        title = "Factors related to Pine Beetle infestation in forests as they relate to each other when a tree within 1/20th acres is infested vs not")
+                                   "SDI_20th"), ggplot2::aes(color = IND_BA_Infest_20th_fac))
 ```
 
 ### Things to Note
+
+This is a scatterplot matrix showing the relationships between variables.
+<br>
+</br>
+`IND_BA_Infest_20th` is a variable that shows whether a given tree _is_ or _is not_ within 1/20th acres of an infested tree. Variables like `DeadDist` or `Infest_Serv1` also relate to distance and Pine Beetle infestation. As such, I was interested to see whether dividing the each ggpair correlation into either Yes (an infested tree is within 1/20th acres) or No (an infested tree is not within 1/20th acres) to observe whether there was an observable difference between Yes and No. 
+<br>
+</br>
+It looks like for single-variable distributions (e.g. `TreeDiam` by `TreeDiam`), the groups of points divided by `IND_BA_Infest_20th` varied in whether they were observably different or not. The `TreeDiam` plot did not, which makes sense: why would the presence of a Pine Beetle within 1/20th acres affect the diameter of an already grown tree? `DeadDist`, another variable, has two very distinct groups for Yes and No, which also makes sense as the closer to an infested tree a given tree is, the more likely it is within 1/20th acres of that given tree. 
+
 
 It looks like there are several , outliers, anything surprising, reasons for choosing certain 
 variables in the recipe, things that are not normally distributed, etc. 
