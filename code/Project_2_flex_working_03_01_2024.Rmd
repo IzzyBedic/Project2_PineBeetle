@@ -54,6 +54,7 @@ Knowing how these variables relate to each other can help foresters figure out h
   + 300 feet = ~.007 acres, which means that we will probably not want to use any of the beetle population pressure measures of over the smallest variable measure (1/20 acres = .05 acres)<sup>2</sup>
 
 
+
 Row {data-height=200}
 -----------------------------------------------------------------------
 
@@ -110,6 +111,9 @@ The panel to the left is a scatterplot matrix showing the relationships between 
 </br>
 It looks like for single-variable distributions (e.g. `TreeDiam` by `TreeDiam`), the groups of points divided by `IND_BA_Infest_20th` varied in whether they were observably different or not. The `TreeDiam` plot did not, which makes sense: why would the presence of a Pine Beetle within 1/20th acres affect the diameter of an already grown tree? `DeadDist`, another variable, has two very distinct groups for Yes and No, which also makes sense as the closer to an infested tree a given tree is, the more likely it is within 1/20th acres of that given tree. 
 
+
+
+
 Ridge Model
 ==============================================================================
 
@@ -128,6 +132,11 @@ Row {data-height=350}
 
 ```
 
+
+
+
+
+
 Random Forest Model
 ==============================================================================
 
@@ -136,9 +145,13 @@ Row {data-height=350}
 
 ### Predictors
 
-```{r histograms}
+```{r }
 
 ```
+
+
+
+
 
 Conclusion
 ==============================================================================
@@ -166,6 +179,10 @@ ridge_mod <- linear_reg(mixture = 0, penalty = 0.1629751) %>%  # validation samp
 ```{r}
 
 ```
+
+
+
+
 
 Variable Chart
 ==============================================================================
