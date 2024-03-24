@@ -16,6 +16,7 @@ library(GGally) # ggpairs
 library(vip)
 library(tidymodels)
 library(DT) # datatable
+library(RColorBrewer)
 ```
 
 Read Me
@@ -95,8 +96,8 @@ ggpairs(pine_fact_tbl, columns = c("DeadDist",
                                    "TreeDiam", 
                                    "Infest_Serv1", 
                                    "SDI_20th"), ggplot2::aes(color = IND_BA_Infest_20th_fac)) +
-          scale_fill_viridis_d("A") +
-   scale_color_viridis_d("A")
+          scale_fill_brewer(palette = "Dark2") +
+   scale_color_brewer(palette = "Dark2")
 ```
 
 ### Things to Note
