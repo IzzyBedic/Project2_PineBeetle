@@ -94,7 +94,9 @@ pine_fact_tbl <- pine_tbl %>%
 ggpairs(pine_fact_tbl, columns = c("DeadDist", 
                                    "TreeDiam", 
                                    "Infest_Serv1", 
-                                   "SDI_20th"), ggplot2::aes(color = IND_BA_Infest_20th_fac))
+                                   "SDI_20th"), ggplot2::aes(color = IND_BA_Infest_20th_fac)) +
+          scale_fill_viridis_d("A") +
+   scale_color_viridis_d("A")
 ```
 
 ### Things to Note
