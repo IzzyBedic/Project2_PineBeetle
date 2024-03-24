@@ -76,7 +76,7 @@ pine_tbl <- read_excel("../../hgen-612_temp/p1/data/Data_1993.xlsx", sheet = 1)
 
 ```{r makeshowcasebones}
 pine_tbl %>% 
-  dplyr::select(DeadDist, TreeDiam, Infest_Serv1, SDI_20th, BA_Inf_20th) %>% 
+  dplyr::select(DeadDist, TreeDiam, Infest_Serv1, SDI_20th, BA_Inf_20th, IND_BA_Infest_20th) %>% 
   DT::datatable()
 ```
 
@@ -118,7 +118,7 @@ Row {data-height=350}
 
 ### Predictors
 
-```{r}
+```{r histograms}
 
 ```
 
@@ -139,12 +139,14 @@ pine_split <- initial_split(pine_tbl)
 pine_train <- training(pine_split)
 pine_test <- testing(pine_split)
 
+# Creating Recipe
 pine_recipe <- pine_tbl %>% 
-  recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + BA_20th) %>% 
-  step_sqrt(all_outcomes()) %>% # transforms to make normal --- MAKE SURE STILL SHOULD BE SQRT IF NEW VARIABLES
+  recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
+  step_sqrt(all_outcomes()) %>% # transforms to make normal
   step_corr(all_predictors()) # gets rid of variables to get rid of multicollinearity 
 
-
+ridge_mod <- linear_reg(mixture = 0, penalty = 0.1629751) %>%  # validation sample or re-sampling can estimate this
+  set_engine("glmnet")
 ```
 
 ### ROC AUC
