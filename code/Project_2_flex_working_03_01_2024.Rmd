@@ -127,7 +127,7 @@ Row {data-height=350}
 ### Predictors
 
 ```{r ridgesplit}
-# Create training/testing data
+# training/testing data
 pine_split <- initial_split(pine_tbl)
 pine_train <- training(pine_split)
 pine_test <- testing(pine_split)
@@ -135,26 +135,87 @@ pine_test <- testing(pine_split)
 ```
 
 ```{r ridgerecipe}
-# Creating Recipe
-pine_recipe <- pine_tbl %>% 
+# recipe - NEED TO UNDERSTAND MORE
+ridge_recipe <- pine_train %>% 
   recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
   step_sqrt(all_outcomes()) %>% # transforms to make normal
   step_corr(all_predictors()) # gets rid of variables to get rid of multicollinearity 
 ```
 
+```{r ridgelambda}
+# credit for code used to tune lambda goes to Professor York!
+# bootstrap samples for re-sampling and tuning the penalty parameter
+set.seed(1234)
+ridge_boot <- bootstraps(pine_train) # re-sampling
+
+# a grid of tuning parameters
+lambda_grid <- grid_regular(penalty(), levels = 50)
+```
+
 ```{r ridgeengine}
-ridge_model <- linear_reg(mixture = 0, penalty = 0.1629751) %>%  # mixture = 0 means ridge
+ridge_model <- linear_reg(mixture = 0, penalty = tune()) %>% 
   set_engine("glmnet")
+
+ridge_model %>% 
+  translate()
 ```
 
 ```{r ridgeworkflow}
-# create workflow
+# workflow
 pine_ridge_wflow <- 
   workflow() %>% 
   add_model(ridge_model) %>% 
-  add_recipe(pine_recipe)
+  add_recipe(ridge_recipe)
 ```
 
+```{r ridgetuning}
+# credit for code used to tune lambda goes to Professor York!
+
+set.seed(9870)
+ridge_grid <- tune_grid(
+  pine_ridge_wflow,
+  resamples = ridge_boot, # rset object (re-sample object)
+  grid = lambda_grid # the lambda list we are tuning to
+)
+
+
+# bootstrap results
+ridge_grid %>%
+  collect_metrics()
+
+
+ridge_grid %>% 
+  collect_metrics() %>%
+  ggplot(aes(penalty, mean, color = .metric)) +
+  geom_errorbar(aes(
+    ymin = mean - std_err,
+    ymax = mean + std_err
+  ),
+  alpha = 0.5
+  ) +
+  geom_line(size = 1.5) +
+  facet_wrap(~.metric, scales = "free", nrow = 2) +
+  scale_x_log10() +
+  theme(legend.position = "none")
+
+# rmse low and rsq high is more desireable
+
+# We have a couple of options for choosing our final parameter, such as 
+# select_by_pct_loss() or select_by_one_std_err(), but for now let’s stick
+# with just picking the lowest RMSE. After we have that parameter, we can 
+# finalize our workflow, i.e. update it with this value.
+# see https://juliasilge.com/blog/lasso-the-office/
+
+lowest_rmse <- lasso_grid %>% # the algorithm selects the best lambda
+  select_best("rmse")
+
+# update our final model with lowest rmse
+final_lasso <- finalize_workflow(
+  pine_lasso_wflow,
+  lowest_rmse
+)
+
+```
 
 ### Explanation of code
 
