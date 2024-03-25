@@ -135,11 +135,12 @@ pine_test <- testing(pine_split)
 ```
 
 ```{r ridgerecipe}
-# recipe - NEED TO UNDERSTAND MORE
+# recipe
 ridge_recipe <- pine_train %>% 
   recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
   step_sqrt(all_outcomes()) %>% # transforms to make normal
-  step_corr(all_predictors()) # gets rid of variables to get rid of multicollinearity 
+  step_corr(all_predictors()) %>% # gets rid of variables to get rid of multicollinearity 
+  step_zv(all_numeric(), -all_outcomes()) # gets rid of variables of all one value
 ```
 
 ```{r ridgelambda}
@@ -165,13 +166,13 @@ ridge_model %>%
 pine_ridge_wflow <- 
   workflow() %>% 
   add_model(ridge_model) %>% 
-  add_recipe(ridge_recipe)
+  add_recipe(ridge_recipe) 
 ```
 
 ```{r ridgetuning}
 # credit for code used to tune lambda goes to Professor York!
 
-set.seed(9870)
+set.seed(9870) # why do I need to set a seed here?
 ridge_grid <- tune_grid(
   pine_ridge_wflow,
   resamples = ridge_boot, # rset object (re-sample object)
@@ -193,27 +194,41 @@ ridge_grid %>%
   ),
   alpha = 0.5
   ) +
-  geom_line(size = 1.5) +
+  geom_line(linewidth = 1.5) +
   facet_wrap(~.metric, scales = "free", nrow = 2) +
   scale_x_log10() +
   theme(legend.position = "none")
 
 # rmse low and rsq high is more desireable
 
-# We have a couple of options for choosing our final parameter, such as 
-# select_by_pct_loss() or select_by_one_std_err(), but for now let’s stick
-# with just picking the lowest RMSE. After we have that parameter, we can 
-# finalize our workflow, i.e. update it with this value.
-# see https://juliasilge.com/blog/lasso-the-office/
-
-lowest_rmse <- lasso_grid %>% # the algorithm selects the best lambda
+lowest_rmse <- ridge_grid %>% # the algorithm selects the best lambda
   select_best("rmse")
 
-# update our final model with lowest rmse
-final_lasso <- finalize_workflow(
-  pine_lasso_wflow,
+# update final model with lowest rmse
+final_ridge <- finalize_workflow(
+  pine_ridge_wflow,
   lowest_rmse
 )
+
+```
+
+```{r ridgefit}
+pine_ridge_fit <- 
+  final_ridge %>% 
+  fit(data = pine_train)
+
+pine_ridge_fit %>% 
+  extract_fit_parsnip() %>% 
+  tidy()
+
+pine_ridge_fit %>% 
+  extract_spec_parsnip()
+
+last_fit(
+  final_ridge,
+  pine_split
+  ) %>%
+  collect_metrics()
 
 ```
 
