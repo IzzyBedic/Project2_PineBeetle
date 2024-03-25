@@ -74,12 +74,10 @@ ggpairs(pine_tbl, columns = c("SDI_20th",
         
 # Haven't decided which variables to use, but here is the code that will be used
 # Use 1/20th when possible, and factor in TreeDiam
-# Create recipe
 
-pine_recipe <- pine_tbl %>% 
-  recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + BA_20th) %>% 
-  step_sqrt(all_outcomes()) %>% # transforms to make normal --- MAKE SURE STILL SHOULD BE SQRT IF NEW VARIABLES
-  step_corr(all_predictors()) # gets rid of variables to get rid of multicollinearity 
 
+# verify Ridge Regression performance with standard linear regression approach
+lm(sqrt(DeadDist) ~ TreeDiam + Infest_Serv1 + BA_20th, data = pine_tbl) %>% 
+  glance()
 
 
