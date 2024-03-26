@@ -285,48 +285,6 @@ forest_fit <-
   fit(data = pine_train)
 ```
 
-```{r}
-predict(forest_fit, pine_test)
-
-forest_fit %>%
-  predict(pine_test) %>%
-  bind_cols(pine_test)
-
-```
-
-
-```{r}
-iris_ranger %>%
-  predict(iris_testing) %>%
-  bind_cols(iris_testing) %>%
-  metrics(truth = Species, estimate = .pred_class)
-
-
-iris_rf %>%
-  predict(iris_testing) %>%
-  bind_cols(iris_testing) %>%
-  metrics(truth = Species, estimate = .pred_class)
-
-```
-
-
-```{r}
-iris_ranger %>%
-  predict(iris_testing, type = "prob")
-
-
-iris_probs <- iris_ranger %>%
-  predict(iris_testing, type = "prob") %>%
-  bind_cols(iris_testing)
-
-
-iris_probs%>%
-  roc_curve(Species, .pred_setosa:.pred_virginica) %>% print(n = 138)
-  autoplot()
-
-
-```
-
 
 
 
@@ -339,7 +297,7 @@ Conclusion
 
 ```
 
-### ROC AUC
+### RMSE
 
 ```{r}
 
