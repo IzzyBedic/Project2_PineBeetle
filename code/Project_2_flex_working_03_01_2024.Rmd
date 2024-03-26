@@ -257,8 +257,8 @@ Row {data-height=350}
 
 ### Predictors
 
-```{r randomforest}
-random_forest <-  rand_forest(trees = 100, mode = "regression") %>%
+```{r randomforestengine}
+forest_model <-  rand_forest(trees = 100, mode = "regression") %>%
   set_engine("randomForest") %>%
   fit(DeadDist ~ TreeDiam + Infest_Serv1 + IND_BA_Infest_20th, data = pine_train)
 
