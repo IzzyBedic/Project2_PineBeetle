@@ -62,6 +62,9 @@ Row {data-height=200}
 1. [Basic Pine Beetle info](https://www.treefarmsystem.org/SPBwhenbeetlesattack)
 2. [Pine Beetle FAQ USDA](https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb5304956.pdf)
 3. [Stand Density Index info](https://fennerschool-associated.anu.edu.au/mensuration/density.html)
+<br>
+</br>
+_Credit for a majority of the code used in these analyses comes from Dr. Timothy York from Virginia Commonwealth University_
 
 
 
@@ -126,7 +129,7 @@ Row {data-height=350}
 
 ### Predictors
 
-```{r ridgesplit}
+```{r datasplit}
 # training/testing data
 pine_split <- initial_split(pine_tbl)
 pine_train <- training(pine_split)
@@ -134,13 +137,14 @@ pine_test <- testing(pine_split)
 
 ```
 
-```{r ridgerecipe}
+```{r recipe}
 # recipe
-ridge_recipe <- pine_train %>% 
+pine_recipe <- pine_train %>% 
   recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
   step_sqrt(all_outcomes()) %>% # transforms to make normal
   step_corr(all_predictors()) %>% # gets rid of variables to get rid of multicollinearity 
-  step_zv(all_numeric(), -all_outcomes()) # gets rid of variables of all one value
+  step_zv(all_numeric(), -all_outcomes()) %>% 
+  step_scale(all_predictors(), -all_outcomes()) # gets rid of variables of all one value
 ```
 
 ```{r ridgelambda}
@@ -166,11 +170,10 @@ ridge_model %>%
 pine_ridge_wflow <- 
   workflow() %>% 
   add_model(ridge_model) %>% 
-  add_recipe(ridge_recipe) 
+  add_recipe(pine_recipe) 
 ```
 
 ```{r ridgetuning}
-# credit for code used to tune lambda goes to Professor York!
 
 set.seed(9870) # why do I need to set a seed here?
 ridge_grid <- tune_grid(
@@ -230,6 +233,9 @@ last_fit(
   ) %>%
   collect_metrics()
 
+# verify Ridge Regression performance with standard linear regression approach
+lm(sqrt(DeadDist) ~ TreeDiam + Infest_Serv1 + IND_BA_Infest_20th, data = pine_tbl) %>% 
+  glance()
 ```
 
 ### Explanation of code
@@ -251,8 +257,19 @@ Row {data-height=350}
 
 ### Predictors
 
-```{r }
+```{r randomforest}
+random_forest <-  rand_forest(trees = 100, mode = "regression") %>%
+  set_engine("randomForest") %>%
+  fit(DeadDist ~ TreeDiam + Infest_Serv1 + IND_BA_Infest_20th, data = pine_train)
 
+```
+
+```{r forestworkflow}
+# workflow
+pine_forest_wflow <- 
+  workflow() %>% 
+  add_model(forest_model) %>% 
+  add_recipe(pine_recipe) 
 ```
 
 
