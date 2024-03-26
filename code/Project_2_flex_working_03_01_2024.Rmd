@@ -137,9 +137,8 @@ pine_test <- testing(pine_split)
 
 ```
 
-```{r recipe}
-# recipe
-pine_recipe <- pine_train %>% 
+```{r ridgerecipe}
+ridge_recipe <- pine_train %>% 
   recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
   step_sqrt(all_outcomes()) %>% # transforms to make normal
   step_corr(all_predictors()) %>% # gets rid of variables to get rid of multicollinearity 
@@ -170,7 +169,7 @@ ridge_model %>%
 pine_ridge_wflow <- 
   workflow() %>% 
   add_model(ridge_model) %>% 
-  add_recipe(pine_recipe) 
+  add_recipe(ridge_recipe) 
 ```
 
 ```{r ridgetuning}
@@ -238,6 +237,7 @@ lm(sqrt(DeadDist) ~ TreeDiam + Infest_Serv1 + IND_BA_Infest_20th, data = pine_tb
   glance()
 ```
 
+
 ### Explanation of code
 
 ```{r}
@@ -257,21 +257,75 @@ Row {data-height=350}
 
 ### Predictors
 
+```{r forestrecipe}
+forest_recipe <- pine_train %>% 
+  recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
+  step_corr(all_predictors()) %>% # gets rid of variables to get rid of multicollinearity 
+  step_zv(all_numeric(), -all_outcomes()) %>% 
+  step_scale(all_predictors(), -all_outcomes()) # gets rid of variables of all one value
+```
+
 ```{r randomforestengine}
 forest_model <-  rand_forest(trees = 100, mode = "regression") %>%
-  set_engine("randomForest") %>%
-  fit(DeadDist ~ TreeDiam + Infest_Serv1 + IND_BA_Infest_20th, data = pine_train)
+  set_engine("randomForest") 
 
 ```
 
 ```{r forestworkflow}
 # workflow
-pine_forest_wflow <- 
+forest_wflow <- 
   workflow() %>% 
   add_model(forest_model) %>% 
-  add_recipe(pine_recipe) 
+  add_recipe(forest_recipe) 
 ```
 
+```{r forestfit}
+forest_fit <- 
+  forest_wflow %>% 
+  fit(data = pine_train)
+```
+
+```{r}
+predict(forest_fit, pine_test)
+
+forest_fit %>%
+  predict(pine_test) %>%
+  bind_cols(pine_test)
+
+```
+
+
+```{r}
+iris_ranger %>%
+  predict(iris_testing) %>%
+  bind_cols(iris_testing) %>%
+  metrics(truth = Species, estimate = .pred_class)
+
+
+iris_rf %>%
+  predict(iris_testing) %>%
+  bind_cols(iris_testing) %>%
+  metrics(truth = Species, estimate = .pred_class)
+
+```
+
+
+```{r}
+iris_ranger %>%
+  predict(iris_testing, type = "prob")
+
+
+iris_probs <- iris_ranger %>%
+  predict(iris_testing, type = "prob") %>%
+  bind_cols(iris_testing)
+
+
+iris_probs%>%
+  roc_curve(Species, .pred_setosa:.pred_virginica) %>% print(n = 138)
+  autoplot()
+
+
+```
 
 
 
