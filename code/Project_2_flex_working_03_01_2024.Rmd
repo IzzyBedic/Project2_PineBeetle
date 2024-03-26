@@ -13,7 +13,6 @@ library(flexdashboard)
 library(tidyverse)
 library(readxl)
 library(GGally) # ggpairs
-library(vip)
 library(tidymodels)
 library(DT) # datatable
 library(RColorBrewer)
@@ -134,7 +133,7 @@ Row {data-height=350}
 ```{r sqrtdeaddist}
 # I tried using step_sqrt(all_outcomes()) to normalize curve, but it kept giving me an error because predict() does not take models that have outcomes() used in the recipe. As such, I am transforming the data ahead of time outside of the recipe to avoid this error
 
-pine_tbl_sqrt <- pine_tbl %>% 
+pine_tbl_sqrt <- pine_fact_tbl %>% 
   mutate(DeadDist_sqrt = sqrt(DeadDist))
   
 # source: https://stackoverflow.com/questions/75762005/error-in-step-log-when-trying-to-make-predictions-with-my-model
@@ -178,7 +177,7 @@ ridge_model %>%
 
 ```{r ridgeworkflow}
 # workflow
-pine_ridge_wflow <- 
+ridge_wflow <- 
   workflow() %>% 
   add_model(ridge_model) %>% 
   add_recipe(ridge_recipe)
@@ -188,7 +187,7 @@ pine_ridge_wflow <-
 
 set.seed(9870) # why do I need to set a seed here?
 ridge_grid <- tune_grid(
-  pine_ridge_wflow,
+  ridge_wflow,
   resamples = ridge_boot, # rset object (re-sample object)
   grid = lambda_grid # the lambda list we are tuning to
 )
@@ -220,22 +219,22 @@ lowest_rmse <- ridge_grid %>% # the algorithm selects the best lambda
 
 # update final model with lowest rmse
 final_ridge <- finalize_workflow(
-  pine_ridge_wflow,
+  ridge_wflow,
   lowest_rmse
 )
 
 ```
 
 ```{r ridgefit}
-pine_ridge_fit <- 
+ridge_fit <- 
   final_ridge %>% 
   fit(data = pine_train)
 
-pine_ridge_fit %>% 
+ridge_fit %>% 
   extract_fit_parsnip() %>% 
   tidy()
 
-pine_ridge_fit %>% 
+ridge_fit %>% 
   extract_spec_parsnip()
 
 last_fit(
@@ -305,23 +304,42 @@ Conclusion
 ### Model Results
 
 ```{r comparermse}
-pine_ridge_fit %>% 
+ridge_predicted <- ridge_fit %>% 
   predict(pine_test) %>%
-  bind_cols(pine_test) %>%
+  bind_cols(pine_test) 
+
+ridge_predicted %>%
   metrics(truth = DeadDist_sqrt, estimate = .pred)
 
-forest_fit %>%
+forest_predicted <- forest_fit %>%
   predict(pine_test) %>%
-  bind_cols(pine_test) %>%
+  bind_cols(pine_test) 
+
+forest_predicted  %>%
   metrics(truth = DeadDist_sqrt, estimate = .pred)
+
+ggplot(ridge_predicted, aes(x = DeadDist_sqrt, y = .pred)) + 
+  geom_point(alpha = 0.5) + 
+  labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree") +
+  coord_obs_pred()
 ```
-
-### RMSE
 
 ```{r}
-
+library(modelr)
+pine_tbl_sqrt %>% 
+  add_residuals(ridge_fit) %>% 
+  ggplot(aes(DeadDist_sqrt, resid) +
+  geom_point() +
+  geom_abline() +
+  geom_errorbar(aes(
+    ymin = mean - std_err,
+    ymax = mean + std_err
+  ),
+  alpha = 0.5
+  ) +
+  geom_line(linewidth = 1.5) +
+  theme(legend.position = "none")
 ```
-
 
 
 
