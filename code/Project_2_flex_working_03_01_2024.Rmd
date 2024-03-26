@@ -18,6 +18,7 @@ library(tidymodels)
 library(DT) # datatable
 library(RColorBrewer)
 library(randomForest)
+library(yardstick)
 ```
 
 Read Me
@@ -130,20 +131,30 @@ Row {data-height=350}
 
 ### Predictors
 
+```{r sqrtdeaddist}
+# I tried using step_sqrt(all_outcomes()) to normalize curve, but it kept giving me an error because predict() does not take models that have outcomes() used in the recipe. As such, I am transforming the data ahead of time outside of the recipe to avoid this error
+
+pine_tbl_sqrt <- pine_tbl %>% 
+  mutate(DeadDist_sqrt = sqrt(DeadDist))
+  
+# source: https://stackoverflow.com/questions/75762005/error-in-step-log-when-trying-to-make-predictions-with-my-model
+```
+
 ```{r datasplit}
 # training/testing data
-pine_split <- initial_split(pine_tbl)
+pine_split <- initial_split(pine_tbl_sqrt)
 pine_train <- training(pine_split)
 pine_test <- testing(pine_split)
 
+
 ```
+
 
 ```{r ridgerecipe}
 ridge_recipe <- pine_train %>% 
-  recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
+  recipe(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>%
   step_corr(all_predictors()) %>% # gets rid of variables to get rid of multicollinearity 
-  step_zv(all_numeric(), -all_outcomes()) %>% 
-  step_sqrt(all_outcomes()) %>% # transforms to make normal
+  step_zv(-all_outcomes()) %>% 
   step_scale(all_predictors(), -all_outcomes()) # gets rid of variables of all one value
 ```
 
@@ -170,7 +181,7 @@ ridge_model %>%
 pine_ridge_wflow <- 
   workflow() %>% 
   add_model(ridge_model) %>% 
-  add_recipe(ridge_recipe) 
+  add_recipe(ridge_recipe)
 ```
 
 ```{r ridgetuning}
@@ -234,7 +245,7 @@ last_fit(
   collect_metrics()
 
 # verify Ridge Regression performance with standard linear regression approach
-lm(sqrt(DeadDist) ~ TreeDiam + Infest_Serv1 + IND_BA_Infest_20th, data = pine_tbl) %>% 
+lm(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 + IND_BA_Infest_20th, data = pine_tbl_sqrt) %>% 
   glance()
 ```
 
@@ -260,7 +271,7 @@ Row {data-height=350}
 
 ```{r forestrecipe}
 forest_recipe <- pine_train %>% 
-  recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
+  recipe(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
   step_corr(all_predictors()) %>% # gets rid of variables to get rid of multicollinearity 
   step_zv(all_numeric(), -all_outcomes()) %>% 
   step_scale(all_predictors(), -all_outcomes()) # gets rid of variables of all one value
@@ -277,7 +288,7 @@ forest_model <-  rand_forest(trees = 100, mode = "regression") %>%
 forest_wflow <- 
   workflow() %>% 
   add_model(forest_model) %>% 
-  add_recipe(forest_recipe) 
+  add_recipe(forest_recipe)
 ```
 
 ```{r forestfit}
@@ -285,28 +296,24 @@ forest_fit <-
   forest_wflow %>% 
   fit(data = pine_train)
 
-
 ```
 
-```{r comparermse}
-forest_fit %>%
-  predict(pine_test) %>%
-  bind_cols(pine_test) %>%
-  metrics(truth = DeadDist, estimate = .pred)
-
-pine_ridge_fit %>% 
-  predict(pine_test) %>%
-  bind_cols(pine_test) %>%
-  metrics(truth = DeadDist, estimate = .pred)
-```
 
 Conclusion
 ==============================================================================
 
 ### Model Results
 
-```{r}
+```{r comparermse}
+pine_ridge_fit %>% 
+  predict(pine_test) %>%
+  bind_cols(pine_test) %>%
+  metrics(truth = DeadDist_sqrt, estimate = .pred)
 
+forest_fit %>%
+  predict(pine_test) %>%
+  bind_cols(pine_test) %>%
+  metrics(truth = DeadDist_sqrt, estimate = .pred)
 ```
 
 ### RMSE
