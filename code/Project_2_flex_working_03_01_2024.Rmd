@@ -17,6 +17,7 @@ library(vip)
 library(tidymodels)
 library(DT) # datatable
 library(RColorBrewer)
+library(randomForest)
 ```
 
 Read Me
@@ -140,9 +141,9 @@ pine_test <- testing(pine_split)
 ```{r ridgerecipe}
 ridge_recipe <- pine_train %>% 
   recipe(DeadDist ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
-  step_sqrt(all_outcomes()) %>% # transforms to make normal
   step_corr(all_predictors()) %>% # gets rid of variables to get rid of multicollinearity 
   step_zv(all_numeric(), -all_outcomes()) %>% 
+  step_sqrt(all_outcomes()) %>% # transforms to make normal
   step_scale(all_predictors(), -all_outcomes()) # gets rid of variables of all one value
 ```
 
@@ -283,10 +284,21 @@ forest_wflow <-
 forest_fit <- 
   forest_wflow %>% 
   fit(data = pine_train)
+
+
 ```
 
+```{r comparermse}
+forest_fit %>%
+  predict(pine_test) %>%
+  bind_cols(pine_test) %>%
+  metrics(truth = DeadDist, estimate = .pred)
 
-
+pine_ridge_fit %>% 
+  predict(pine_test) %>%
+  bind_cols(pine_test) %>%
+  metrics(truth = DeadDist, estimate = .pred)
+```
 
 Conclusion
 ==============================================================================
