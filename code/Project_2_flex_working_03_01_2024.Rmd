@@ -180,8 +180,6 @@ ridge_model <- linear_reg(mixture = 0, penalty = tune()) %>%
 
 ridge_model %>% 
   translate()
-
-
 ```
 
 ```{r ridgeworkflow, include=FALSE}
@@ -193,7 +191,6 @@ ridge_wflow <-
 ```
 
 ```{r ridgetuning, include=FALSE}
-
 set.seed(9870) # why do I need to set a seed here?
 ridge_grid <- tune_grid(
   ridge_wflow,
@@ -208,7 +205,6 @@ ridge_grid %>%
 ```
 
 ```{r rmsechart}
-
 ridge_grid %>% 
   collect_metrics() %>%
   ggplot(aes(penalty, mean, color = .metric)) +
@@ -241,7 +237,6 @@ Row {data-height=450}
 -----------------------------------------------------------------------
 
 ```{r ridgefit, include=FALSE}
-
 final_ridge %>% 
   fit(data = pine_train)
 
@@ -258,11 +253,10 @@ last_fit(
   pine_split
   ) %>%
   collect_metrics()
-
 ```
 
 
-### Explanation of code
+### 
 
 ```{r ridgermse}
 ridge_predicted <- final_ridge %>% 
@@ -270,17 +264,19 @@ ridge_predicted <- final_ridge %>%
   predict(pine_test) %>%
   bind_cols(pine_test) 
 
-ridge_predicted %>%
-  metrics(truth = DeadDist_sqrt, estimate = .pred)
+DT::datatable(ridge_predicted %>%
+  metrics(truth = DeadDist_sqrt, estimate = .pred))
 ```
 
+### Actual vs Predicted Values
 ```{r actualvspredictedridge}
 
 ridge_predicted %>% 
-  ggplot(aes(x = DeadDist_sqrt, y = .pred)) + 
+  ggplot(aes(x = DeadDist_sqrt, y = .pred, color = IND_BA_Infest_20th)) + 
   geom_point(alpha = 0.5) + 
   labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree") +
-  coord_obs_pred()
+  coord_obs_pred() +
+  theme(legend.position = "none")
 ```
 
 
@@ -343,10 +339,11 @@ forest_predicted  %>%
 
 ```{r actualvspredicted}
 forest_predicted  %>%
-  ggplot(aes(x = DeadDist_sqrt, y = .pred)) + 
+  ggplot(aes(x = DeadDist_sqrt, y = .pred, color = IND_BA_Infest_20th)) + 
   geom_point(alpha = 0.5) + 
   labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree") +
-  coord_obs_pred()
+  coord_obs_pred() +
+  theme(legend.position = "none")
 ```
 
 
