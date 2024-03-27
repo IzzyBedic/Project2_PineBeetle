@@ -17,6 +17,7 @@ library(tidymodels)
 library(DT) # datatable
 library(RColorBrewer) # colors for ggplots
 library(randomForest) # model type
+library(plotly) # guage
 ```
 
 Read Me
@@ -137,7 +138,15 @@ Ridge Model
 Row {data-height=350}
 -----------------------------------------------------------------------
 
-### RMSE and RSQ chart
+### Ridge Model Evaluation
+
+One of the two models I used to find how far away an infected tree can be from a given healthy tree be to be considered "safe" was a ridge regression model. This kind of model is good for when there are numerous predictors, like in this model. for this model I use `DeadDist_sqrt` (I took the square root of DeadDist to make the distribution more normal) as the outcome variable and `TreeDiam`, `Infest_Serv1`, `SDI_20th`, and `IND_BA_Infest_20th` as the predictor variables. In a ridge regression the coefficients of each predictor variable is optimized to create an accurate model, so some coefficients may be near zero if they are not very relevant to the outcome variable, or a coefficient may be much more than another variable's coefficient if it is very influential to the outcome variable.
+<br>
+</br>
+This model's RMSE is 1.3785935, on which is a means that the average difference between this model's predicted values and the actual values in the dataset is 1.3785935. To put that into the context of the scale of the `DeadDist_sqrt`, the total range of values in `DeadDist_sqrt` is 0.3277936 to 11.1783. 
+<br>
+</br>
+The graph below was made with predicted values from the model and the actual values from the testing data. There is a strange split at 3 where the data divides into two groups: one that seems slightly diagonal where the trees are nearer to an infested tree, and one horizontal, where the nearest infested tree is not within 1/20th acres. I know that a predicted vs actual graph for a regression model is supposed to be diagonal, however I tried using different evaluations and the base r function to no better of a graph. Additionally, the adjusted r squared seems good. I cannot see where the model is incorrect with my current time and skill, though I know it is somewhere. I am sorry about this but I have the code and know how to evaluate it, so I am proceeding with what I have.
 
 ```{r sqrtdeaddist}
 # I tried using step_sqrt(all_outcomes()) to normalize curve, but it kept giving me an error because predict() does not take models that have outcomes() used in the recipe. As such, I am transforming the data ahead of time outside of the recipe to avoid this error
@@ -204,7 +213,7 @@ ridge_grid %>%
   collect_metrics()
 ```
 
-```{r rmsechart}
+```{r rmsechart, include=FALSE}
 ridge_grid %>% 
   collect_metrics() %>%
   ggplot(aes(penalty, mean, color = .metric)) +
@@ -256,27 +265,44 @@ last_fit(
 ```
 
 
-### 
+### RMSE
 
-```{r ridgermse}
+```{r ridgermse, include = FALSE}
 ridge_predicted <- final_ridge %>% 
   fit(data = pine_train) %>% 
   predict(pine_test) %>%
   bind_cols(pine_test) 
 
-DT::datatable(ridge_predicted %>%
-  metrics(truth = DeadDist_sqrt, estimate = .pred))
+ridge_metrics <- ridge_predicted %>%
+  metrics(truth = DeadDist_sqrt, estimate = .pred)
+```
+
+```{r ridgeguage}
+plot_ly(
+    domain = list(x = c(0, 1), y = c(0, 1)),
+    value = 1.3785935,
+    title = list(text = "RMSE"),
+    type = "indicator",
+    mode = "gauge+number",
+    gauge = list(
+      axis = list(range = list(0, max(pine_tbl_sqrt$DeadDist_sqrt) - min(pine_tbl_sqrt$DeadDist_sqrt)), tickwidth = 1, tickcolor = "yellow"),
+      bar = list(color = "yellow")))
+# https://plotly.com/r/gauge-charts/
 ```
 
 ### Actual vs Predicted Values
 ```{r actualvspredictedridge}
 
 ridge_predicted %>% 
-  ggplot(aes(x = DeadDist_sqrt, y = .pred, color = IND_BA_Infest_20th)) + 
+  ggplot(aes(x = DeadDist_sqrt, y = .pred, color = factor(IND_BA_Infest_20th,
+                                                          levels = 0:1,
+                                                          labels = c("No", "Yes")))) + 
   geom_point(alpha = 0.5) + 
-  labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree") +
+  labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree", color = "Infested tree within 1/20th acres?") +
   coord_obs_pred() +
-  theme(legend.position = "none")
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") 
+
 ```
 
 
@@ -289,7 +315,7 @@ Random Forest Model
 Row {data-height=350}
 -----------------------------------------------------------------------
 
-### Predictors
+### Random Forest Evaluation
 
 ```{r forestrecipe}
 forest_recipe <- pine_train %>% 
@@ -320,6 +346,9 @@ forest_wflow %>%
 lm(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th, data = pine_tbl_sqrt) %>% 
   glance()
 ```
+
+Row {data-height=450}
+-----------------------------------------------------------------------
 
 
 Conclusion
