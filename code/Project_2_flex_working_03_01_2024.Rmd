@@ -315,6 +315,14 @@ Row {data-height=350}
 
 ### Random Forest Evaluation
 
+The actual vs predicted graph here seems more diagonal, but is still split into two groups. 
+<br>
+</br>
+A random forest model uses a decision tree to narrow down what parts of the data indicate well for the outcome variable values.
+<br>
+</br>
+On the next page of this flexdashboard is a comparison of the two models' metrics
+
 ```{r forestrecipe}
 forest_recipe <- pine_train %>% 
   recipe(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>% 
@@ -348,17 +356,7 @@ lm(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th, dat
 Row {data-height=450}
 -----------------------------------------------------------------------
 
-```{r forestevaluation}
-forest_wflow %>% 
-  fit(data = pine_train) %>% 
-  predict(pine_test) %>%
-  bind_cols(pine_test) 
-```
-Conclusion
-==============================================================================
-
-### Model Results
-
+### Actual vs Predicted Graph for Random Forest Model
 ```{r forestrmse, include = FALSE}
 forest_predicted <- forest_wflow %>% 
   fit(data = pine_train) %>% 
@@ -381,7 +379,49 @@ forest_predicted  %>%
   scale_color_brewer(palette = "Dark2") 
 ```
 
+Conclusion
+==============================================================================
 
+Row {data-height=250}
+-----------------------------------------------------------------------
+### Explaination
+
+Overall, the random forest model had a lower rmse and a higher rsq. Both are indicators of a more functional model, so I will say the random forest model is more accurate.
+
+Row {data-height=550}
+-----------------------------------------------------------------------
+
+### Model Results in Graph Form
+
+```{r compare}
+metric_table <- forest_predicted  %>%
+  metrics(truth = DeadDist_sqrt, estimate = .pred) %>% 
+  mutate(forest_estimate = .estimate) %>% 
+  select(-.estimate, -.estimator) %>% 
+  bind_cols(ridge_metrics) %>% 
+  mutate(ridge_estimate = .estimate) %>% 
+  select(-.estimate, -.estimator, -.metric...3)
+metric_table %>% 
+  pivot_longer(
+    cols = !.metric...1, 
+    names_to = "model_type", 
+    values_to = "value") %>% 
+  filter(.metric...1 == "rmse") %>% 
+  ggplot(aes(model_type, value, fill = model_type)) +
+  geom_bar(stat = "identity") +
+  ylim(0, 11.1783) +
+  scale_fill_brewer(palette = "Dark2")
+
+```
+
+### Model Results in Table Form
+
+```{r resultstable}
+metric_table %>% 
+  mutate(metric = .metric...1) %>%
+  select(metric, forest_estimate, ridge_estimate, -.metric...1) %>% 
+  DT::datatable()
+```
 
 Variable Chart
 ==============================================================================
