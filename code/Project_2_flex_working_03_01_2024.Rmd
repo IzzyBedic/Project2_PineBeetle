@@ -9,15 +9,14 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-library(flexdashboard)
+library(flexdashboard) # base for presentation
 library(tidyverse)
-library(readxl)
+library(readxl) # reading in data
 library(GGally) # ggpairs
 library(tidymodels)
 library(DT) # datatable
-library(RColorBrewer)
-library(randomForest)
-library(yardstick)
+library(RColorBrewer) # colors for ggplots
+library(randomForest) # model type
 ```
 
 Read Me
@@ -87,6 +86,7 @@ pine_tbl <- read_excel("../../hgen-612_temp/p1/data/Data_1993.xlsx", sheet = 1)
 pine_tbl %>% 
   dplyr::select(DeadDist, TreeDiam, Infest_Serv1, SDI_20th, BA_Inf_20th, IND_BA_Infest_20th) %>% 
   DT::datatable()
+
 ```
 
 
@@ -95,7 +95,7 @@ Row {data-height=450}
 
 ### Factors related to Pine Beetle infestation in forests as they relate to each other when a tree within 1/20th acres is infested vs not
 
-```{r ggpairs}
+```{r ggpairsIND}
 pine_fact_tbl <- pine_tbl %>% 
   mutate(IND_BA_Infest_20th_fac = factor(IND_BA_Infest_20th,
                               levels = 0:1,
@@ -107,6 +107,16 @@ ggpairs(pine_fact_tbl, columns = c("DeadDist",
                                    "SDI_20th"), ggplot2::aes(color = IND_BA_Infest_20th_fac)) +
           scale_fill_brewer(palette = "Dark2") +
    scale_color_brewer(palette = "Dark2")
+```
+
+### Factors related to Pine Beetle infestation in forests as they relate to each other in general
+
+```{r ggpairsregular}
+ggpairs(pine_fact_tbl, columns = c("DeadDist", 
+                                   "TreeDiam", 
+                                   "Infest_Serv1", 
+                                   "SDI_20th",
+                                   "IND_BA_Infest_20th"))
 ```
 
 ### Things to Note
@@ -121,14 +131,13 @@ It looks like for single-variable distributions (e.g. `TreeDiam` by `TreeDiam`),
 
 
 
-
 Ridge Model
 ==============================================================================
 
 Row {data-height=350}
 -----------------------------------------------------------------------
 
-### Predictors
+### RMSE and RSQ chart
 
 ```{r sqrtdeaddist}
 # I tried using step_sqrt(all_outcomes()) to normalize curve, but it kept giving me an error because predict() does not take models that have outcomes() used in the recipe. As such, I am transforming the data ahead of time outside of the recipe to avoid this error
@@ -144,12 +153,10 @@ pine_tbl_sqrt <- pine_fact_tbl %>%
 pine_split <- initial_split(pine_tbl_sqrt)
 pine_train <- training(pine_split)
 pine_test <- testing(pine_split)
-
-
 ```
 
 
-```{r ridgerecipe}
+```{r ridgerecipe, include=FALSE}
 ridge_recipe <- pine_train %>% 
   recipe(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th) %>%
   step_corr(all_predictors()) %>% # gets rid of variables to get rid of multicollinearity 
@@ -157,7 +164,7 @@ ridge_recipe <- pine_train %>%
   step_scale(all_predictors(), -all_outcomes()) # gets rid of variables of all one value
 ```
 
-```{r ridgelambda}
+```{r ridgelambda, include=FALSE}
 # credit for code used to tune lambda goes to Professor York!
 # bootstrap samples for re-sampling and tuning the penalty parameter
 set.seed(1234)
@@ -167,15 +174,17 @@ ridge_boot <- bootstraps(pine_train) # re-sampling
 lambda_grid <- grid_regular(penalty(), levels = 50)
 ```
 
-```{r ridgeengine}
+```{r ridgemodelandengine, include = FALSE}
 ridge_model <- linear_reg(mixture = 0, penalty = tune()) %>% 
   set_engine("glmnet")
 
 ridge_model %>% 
   translate()
+
+
 ```
 
-```{r ridgeworkflow}
+```{r ridgeworkflow, include=FALSE}
 # workflow
 ridge_wflow <- 
   workflow() %>% 
@@ -183,7 +192,7 @@ ridge_wflow <-
   add_recipe(ridge_recipe)
 ```
 
-```{r ridgetuning}
+```{r ridgetuning, include=FALSE}
 
 set.seed(9870) # why do I need to set a seed here?
 ridge_grid <- tune_grid(
@@ -196,7 +205,9 @@ ridge_grid <- tune_grid(
 # bootstrap results
 ridge_grid %>%
   collect_metrics()
+```
 
+```{r rmsechart}
 
 ridge_grid %>% 
   collect_metrics() %>%
@@ -225,16 +236,21 @@ final_ridge <- finalize_workflow(
 
 ```
 
-```{r ridgefit}
-ridge_fit <- 
-  final_ridge %>% 
+
+Row {data-height=450}
+-----------------------------------------------------------------------
+
+```{r ridgefit, include=FALSE}
+
+final_ridge %>% 
   fit(data = pine_train)
 
-ridge_fit %>% 
+final_ridge %>% 
+  fit(pine_train) %>%
   extract_fit_parsnip() %>% 
   tidy()
 
-ridge_fit %>% 
+final_ridge %>% 
   extract_spec_parsnip()
 
 last_fit(
@@ -243,18 +259,29 @@ last_fit(
   ) %>%
   collect_metrics()
 
-# verify Ridge Regression performance with standard linear regression approach
-lm(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 + IND_BA_Infest_20th, data = pine_tbl_sqrt) %>% 
-  glance()
 ```
 
 
 ### Explanation of code
 
-```{r}
+```{r ridgermse}
+ridge_predicted <- final_ridge %>% 
+  fit(data = pine_train) %>% 
+  predict(pine_test) %>%
+  bind_cols(pine_test) 
 
+ridge_predicted %>%
+  metrics(truth = DeadDist_sqrt, estimate = .pred)
 ```
 
+```{r actualvspredictedridge}
+
+ridge_predicted %>% 
+  ggplot(aes(x = DeadDist_sqrt, y = .pred)) + 
+  geom_point(alpha = 0.5) + 
+  labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree") +
+  coord_obs_pred()
+```
 
 
 
@@ -290,11 +317,12 @@ forest_wflow <-
   add_recipe(forest_recipe)
 ```
 
-```{r forestfit}
-forest_fit <- 
-  forest_wflow %>% 
+```{r forestfit, include = FALSE}
+forest_wflow %>% 
   fit(data = pine_train)
 
+lm(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th, data = pine_tbl_sqrt) %>% 
+  glance()
 ```
 
 
@@ -303,44 +331,23 @@ Conclusion
 
 ### Model Results
 
-```{r comparermse}
-ridge_predicted <- ridge_fit %>% 
-  predict(pine_test) %>%
-  bind_cols(pine_test) 
-
-ridge_predicted %>%
-  metrics(truth = DeadDist_sqrt, estimate = .pred)
-
-forest_predicted <- forest_fit %>%
+```{r forestrmse, include = FALSE}
+forest_predicted <- forest_wflow %>% 
+  fit(data = pine_train) %>% 
   predict(pine_test) %>%
   bind_cols(pine_test) 
 
 forest_predicted  %>%
   metrics(truth = DeadDist_sqrt, estimate = .pred)
+```
 
-ggplot(ridge_predicted, aes(x = DeadDist_sqrt, y = .pred)) + 
+```{r actualvspredicted}
+forest_predicted  %>%
+  ggplot(aes(x = DeadDist_sqrt, y = .pred)) + 
   geom_point(alpha = 0.5) + 
   labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree") +
   coord_obs_pred()
 ```
-
-```{r}
-library(modelr)
-pine_tbl_sqrt %>% 
-  add_residuals(ridge_fit) %>% 
-  ggplot(aes(DeadDist_sqrt, resid) +
-  geom_point() +
-  geom_abline() +
-  geom_errorbar(aes(
-    ymin = mean - std_err,
-    ymax = mean + std_err
-  ),
-  alpha = 0.5
-  ) +
-  geom_line(linewidth = 1.5) +
-  theme(legend.position = "none")
-```
-
 
 
 
