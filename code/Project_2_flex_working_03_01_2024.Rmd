@@ -292,7 +292,6 @@ plot_ly(
 
 ### Actual vs Predicted Values
 ```{r actualvspredictedridge}
-
 ridge_predicted %>% 
   ggplot(aes(x = DeadDist_sqrt, y = .pred, color = factor(IND_BA_Infest_20th,
                                                           levels = 0:1,
@@ -302,7 +301,6 @@ ridge_predicted %>%
   coord_obs_pred() +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") 
-
 ```
 
 
@@ -350,7 +348,12 @@ lm(DeadDist_sqrt ~ TreeDiam + Infest_Serv1 +  SDI_20th + IND_BA_Infest_20th, dat
 Row {data-height=450}
 -----------------------------------------------------------------------
 
-
+```{r forestevaluation}
+forest_wflow %>% 
+  fit(data = pine_train) %>% 
+  predict(pine_test) %>%
+  bind_cols(pine_test) 
+```
 Conclusion
 ==============================================================================
 
@@ -368,11 +371,14 @@ forest_predicted  %>%
 
 ```{r actualvspredicted}
 forest_predicted  %>%
-  ggplot(aes(x = DeadDist_sqrt, y = .pred, color = IND_BA_Infest_20th)) + 
+  ggplot(aes(x = DeadDist_sqrt, y = .pred, color = factor(IND_BA_Infest_20th,
+                                                          levels = 0:1,
+                                                          labels = c("No", "Yes")))) + 
   geom_point(alpha = 0.5) + 
-  labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree") +
+  labs(y = "Predicted Minimum Distance to an Infected Tree (sqrt)", x = "Actual Minimum Distance to an Infected Tree", color = "Infested tree within 1/20th acres?") +
   coord_obs_pred() +
-  theme(legend.position = "none")
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") 
 ```
 
 
